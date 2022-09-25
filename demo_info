@@ -1,0 +1,4 @@
+install docker and minkube in the jenkins server.
+
+sudo usermod -a -G docker jenkins
+    permission for jenkins user to run docker
