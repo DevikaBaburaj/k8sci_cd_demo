@@ -8,38 +8,27 @@ pipeline {
     stages {
         stage('Source') {
             steps {
-                git branch: 'batch-4', changelog: false, credentialsId: 'token1', poll: false, url: 'https://github.com/DevikaBaburaj/spring-boot-jsp.git'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn test'
+                git branch: 'main', changelog: false, credentialsId: 'git_token', url: 'https://github.com/DevikaBaburaj/k8sci_cd_demo.git'
             }
         }
         stage('Build') {
             steps {
-                sh 'docker build -t registry/kubeimage .'
+                sh '''
+                docker build -t kubeimage .
+                docker tag kubeimage devikababuraj/k8s-git-demo:${BUILD_NUMBER}
+                echo "Image tagged"
+                '''
             }
         }
         stage('Push') {
             steps {
                 sh '''
-                docker tag kubeimage registry/kubeimage.${BUILD_NUMBER}
                 echo $DOCKER_LOGIN_PSW | docker login -u $DOCKER_LOGIN_USR --password-stdin
-                docker push registry/kubeimage.${BUILD_NUMBER}
+                docker push devikababuraj/k8s-git-demo:${BUILD_NUMBER}
+                echo "Image pushed to docker hub"
                 '''
             }
         }
-        stage('Copying Artifcats') {
-            environment{
-                PUB_KEY = credentials('pubkey')
-            }
-            steps {
-                    sh '''
-                    version=$(perl -nle 'print "$1" if /<version>(v\\d+\\.\\d+\\.\\d+)<\\/version>/' pom.xml)
-                    rsync -e "ssh -o StrictHostKeyChecking=no -i ${PUB_KEY}" -arvc target/news-${version}.jar ubuntu@65.0.92.160:~/
-                    '''
-            }
-        }
+
     }
 }
