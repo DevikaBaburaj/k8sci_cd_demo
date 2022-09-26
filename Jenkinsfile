@@ -23,10 +23,10 @@ pipeline {
         stage('Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'doclogin', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
-            	sh '''
-                docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}
-                docker push devikababuraj/k8s-git-demo:${BUILD_NUMBER}
-                '''
+            	
+                sh 'docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}'
+                sh 'docker push devikababuraj/k8s-git-demo:${BUILD_NUMBER}'
+                
                 }
                 echo "Image pushed to docker hub"
             }
